@@ -8,6 +8,7 @@ import argparse
 import wandb
 from datasets import load_dataset
 from data import augment, generate_masks
+from tqdm import tqdm
 
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -135,7 +136,7 @@ def train(args):
             acc = 0.0
             N_pixels = 0
             N_images = 0
-            for test_bidx in range(0, len(ds["test"]), args.batch_size):
+            for test_bidx in tqdm(range(0, len(ds["test"]), args.batch_size)):
                 batch = ds["test"][test_bidx : test_bidx + args.batch_size]
                 augmented_batch = augment(batch)
                 masks = generate_masks(augmented_batch)
