@@ -15,7 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class BaselineModel(nn.Module):
     def __init__(self, num_classes=2):
-        super(BaselineModel, self).__init__()
+        super().__init__()
         self.num_classes = num_classes
 
         # assuming image size is 640x640
@@ -47,9 +47,48 @@ class BaselineModel(nn.Module):
         return F.sigmoid(self.m(x))
 
 
+class FullConvolutionModel(nn.Module):
+    def __init__(self, num_classes=2):
+        super().__init__()
+        self.num_classes = num_classes
+
+        # assuming image size is 640x640
+        # predict probs for each pixel
+        self.m = nn.Sequential(
+            nn.Conv2d(3, 32, 5, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 128, 5, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(128, 512, 5, 1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(512, 1024, 5, 3),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(1024, 2048, 5, 3),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Flatten(),
+            nn.Linear(2048, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 640 * 640),
+            nn.Sigmoid(),
+            nn.Unflatten(1, (640, 640)),
+        )
+
+        torch.nn.init.xavier_uniform_(self.m[0].weight)
+
+    def forward(self, x):
+        return F.sigmoid(self.m(x))
+
+
 def train(args):
     if args.model == "baseline":
         model = BaselineModel()
+    elif args.model == "fullconv":
+        model = FullConvolutionModel()
     else:
         raise ValueError("Model not supported")
 
