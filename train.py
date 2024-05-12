@@ -132,6 +132,9 @@ def train(args):
 
             # evaluation
             loss = 0.0
+            acc = 0.0
+            N_pixels = 0
+            N_images = 0
             for test_bidx in range(0, len(ds["test"]), args.batch_size):
                 batch = ds["test"][test_bidx : test_bidx + args.batch_size]
                 augmented_batch = augment(batch)
@@ -152,13 +155,25 @@ def train(args):
                     # compute loss
                     loss += loss_fn(preds, masks, reduction="sum")
 
-            loss /= len(ds["test"])
+                    # compute accuracy
+                    batch_accuracy = (preds.round() == masks).sum().item()
+                    acc += batch_accuracy
+                    N_pixels += masks.numel()
+                    N_images += len(augmented_batch)
+
+            loss /= N_images
+            acc /= N_pixels
             wandb.log(
-                {"test_loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx}
+                {
+                    "test_loss": loss.item(),
+                    "epoch": ep_idx,
+                    "batch_idx": batch_idx,
+                    "accuracy": acc,
+                }
             )
 
             print(
-                f"[epoch {ep_idx}] train loss: {loss.item():.4f} test loss: {loss.item():.4f}"
+                f"[epoch {ep_idx}] train loss: {loss.item():.4f} test loss: {loss.item():.4f} test accuracy: {acc:.4f}"
             )
 
 
