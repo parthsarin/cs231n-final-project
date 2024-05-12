@@ -128,7 +128,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--epochs", type=int, default=1000, help="Number of epochs to train for"
     )
-    parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
+    parser.add_argument("--batch-size", type=int, default=30, help="Batch size")
     parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate")
     parser.add_argument("--model", type=str, default="baseline", help="Model to train")
     parser.add_argument(
