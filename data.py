@@ -8,12 +8,18 @@ from torchvision import tv_tensors
 IMG_SIZE = (640, 640)
 
 
-def generate_mask(example):
+def generate_masks(augmented_batch):
     """
     Returns the 0/1 mask for where the license plate is with 1s on the license plate
     """
-    v2
-    pass
+    masks = []
+    for img, box in augmented_batch:
+        mask = torch.zeros(IMG_SIZE)
+        for bbox in box:
+            x, y, w, h = bbox
+            mask[y : y + h, x : x + w] = 1
+        masks.append(mask)
+    return masks
 
 
 def augment(batch):
