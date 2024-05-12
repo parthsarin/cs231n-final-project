@@ -17,7 +17,9 @@ def generate_masks(augmented_batch):
         mask = torch.zeros(IMG_SIZE)
         for bbox in box:
             x, y, w, h = bbox
-            mask[y : y + h, x : x + w] = 1
+            a, b, c, d = x, y, x + w, y + h
+            a, b, c, d = round(a), round(b), round(c), round(d)
+            mask[b:d, a:c] = 1
         masks.append(mask)
     return masks
 
