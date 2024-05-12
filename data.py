@@ -28,14 +28,14 @@ def augment(batch):
     """
     boxes = [
         tv_tensors.BoundingBoxes(
-            example["objects"]["bbox"],
+            obj["bbox"],
             format="XYWH",
-            canvas_size=(example["height"], example["width"]),
+            canvas_size=(h, w),
         )
-        for example in batch
+        for obj, h, w in zip(batch["objects"], batch["height"], batch["width"])
     ]
 
-    images = [example["image"] for example in batch]
+    images = batch["image"]
 
     transforms = v2.Compose(
         [
