@@ -11,6 +11,7 @@ from data import augment, generate_masks
 import random
 
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class BaselineModel(nn.Module):
@@ -51,6 +52,7 @@ def train(args):
     else:
         raise ValueError("Model not supported")
 
+    model = model.to(device)
     loss_fn = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
@@ -63,6 +65,10 @@ def train(args):
             # convert to torch tensors
             images = torch.stack([img for img, _ in augmented_batch])
             masks = torch.stack(masks)
+
+            # move to device
+            images = images.to(device)
+            masks = masks.to(device)
 
             # forward pass
             preds = model(images)
