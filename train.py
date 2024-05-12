@@ -8,7 +8,6 @@ import argparse
 import wandb
 from datasets import load_dataset
 from data import augment, generate_masks
-import random
 
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,9 +34,11 @@ class BaselineModel(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(256 * 20 * 20, 1024),
+            nn.Linear(369664, 1024),
             nn.ReLU(),
-            nn.Linear(1024, num_classes * 640 * 640),
+            nn.Linear(1024, 640 * 640),
+            nn.Sigmoid(),
+            nn.Unflatten(1, (640, 640)),
         )
 
         torch.nn.init.xavier_uniform_(self.m[0].weight)
@@ -79,6 +80,7 @@ def train(args):
             # backward pass
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.1)
             optimizer.step()
 
             wandb.log({"loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx})
@@ -90,19 +92,28 @@ def train(args):
             )
 
             # evaluation
-            test = ds["test"]
-            b_start = random.randint(0, len(test) - args.batch_size)
-            b_end = b_start + args.batch_size
-            batch = test[b_start:b_end]
+            loss = 0.0
+            for test_bidx in range(0, len(ds["test"]), args.batch_size):
+                batch = ds["test"][test_bidx : test_bidx + args.batch_size]
+                augmented_batch = augment(batch)
+                masks = generate_masks(augmented_batch)
 
-            augmented_batch = augment(batch)
-            masks = generate_masks(augmented_batch)
+                # convert to torch tensors
+                images = torch.stack([img for img, _ in augmented_batch])
+                masks = torch.stack(masks)
 
-            images = torch.stack([img for img, _ in augmented_batch])
-            masks = torch.stack(masks)
+                # move to device
+                images = images.to(device)
+                masks = masks.to(device)
 
-            preds = model(images)
-            loss = loss_fn(preds, masks)
+                with torch.no_grad():
+                    # forward pass
+                    preds = model(images)
+
+                    # compute loss
+                    loss += loss_fn(preds, masks, reduction="sum")
+
+            loss /= len(ds["test"])
             wandb.log(
                 {"test_loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx}
             )
@@ -118,7 +129,7 @@ if __name__ == "__main__":
         "--epochs", type=int, default=1000, help="Number of epochs to train for"
     )
     parser.add_argument("--batch-size", type=int, default=16, help="Batch size")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
+    parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate")
     parser.add_argument("--model", type=str, default="baseline", help="Model to train")
     parser.add_argument(
         "--save-path", type=str, default="out", help="Path to save model"

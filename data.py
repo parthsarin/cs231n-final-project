@@ -18,7 +18,7 @@ def generate_masks(augmented_batch):
         for bbox in box:
             x, y, w, h = bbox
             a, b, c, d = x, y, x + w, y + h
-            a, b, c, d = round(a), round(b), round(c), round(d)
+            a, b, c, d = int(a), int(b), int(c), int(d)
             mask[b:d, a:c] = 1
         masks.append(mask)
     return masks
