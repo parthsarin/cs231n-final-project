@@ -10,7 +10,6 @@ from datasets import load_dataset
 from data import augment, generate_masks
 import random
 
-wandb.init(project="cs231n-final-project")
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
 
 
@@ -121,6 +120,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save-every", type=int, default=10, help="Save model every n epochs"
     )
-
     args = parser.parse_args()
+
+    wandb.init(
+        project="cs231n-final-project",
+        config={
+            "epochs": args.epochs,
+            "batch_size": args.batch_size,
+            "lr": args.lr,
+            "model": args.model,
+        },
+    )
+
     train(args)
