@@ -33,7 +33,9 @@ def train(args):
         },
     )
 
+    model = nn.DataParallel(model)
     model = model.to(device)
+
     loss_fn = nn.CrossEntropyLoss()
     test_loss = nn.CrossEntropyLoss(reduction="sum")
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
