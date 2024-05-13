@@ -94,6 +94,7 @@ def train(args):
 
     model = model.to(device)
     loss_fn = nn.CrossEntropyLoss()
+    test_loss = nn.CrossEntropyLoss(reduction="sum")
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     for ep_idx in range(args.epochs):
@@ -153,7 +154,7 @@ def train(args):
                     preds = model(images)
 
                     # compute loss
-                    loss += loss_fn(preds, masks, reduction="sum")
+                    loss += test_loss(preds, masks)
 
                     # compute accuracy
                     batch_accuracy = (preds.round() == masks).sum().item()
