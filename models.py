@@ -25,9 +25,9 @@ class BaselineModel(nn.Module):
             nn.Flatten(),
             nn.Linear(369664, 1024),
             nn.ReLU(),
-            nn.Linear(1024, 640 * 640),
+            nn.Linear(1024, 640 * 640 * 2),
+            nn.Unflatten(1, (2, 640, 640)),
             nn.Sigmoid(),
-            nn.Unflatten(1, (640, 640)),
         )
 
         torch.nn.init.xavier_uniform_(self.m[0].weight)
@@ -62,9 +62,9 @@ class FullConvolutionModel(nn.Module):
             nn.Flatten(),
             nn.Linear(4096, 4096),
             nn.ReLU(),
-            nn.Linear(4096, 640 * 640),
+            nn.Linear(4096, 640 * 640 * 2),
+            nn.Unflatten(1, (2, 640, 640)),
             nn.Sigmoid(),
-            nn.Unflatten(1, (640, 640)),
         )
 
         torch.nn.init.xavier_uniform_(self.m[0].weight)
