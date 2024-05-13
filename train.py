@@ -94,7 +94,7 @@ def train(args):
         raise ValueError("Model not supported")
 
     model = model.to(device)
-    loss_fn = nn.BCELoss()
+    loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     for ep_idx in range(args.epochs):
