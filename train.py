@@ -132,6 +132,7 @@ def train(args):
             )
 
             # evaluation
+            train_loss = loss.item()
             loss = 0.0
             acc = 0.0
             N_pixels = 0
@@ -172,7 +173,7 @@ def train(args):
             )
 
             print(
-                f"[epoch {ep_idx}] train loss: {loss.item():.4f} test loss: {loss.item():.4f} test accuracy: {acc:.4f}"
+                f"[epoch {ep_idx}] train loss: {train_loss:.4f} test loss: {loss.item():.4f} test accuracy: {acc:.4f}"
             )
 
 
