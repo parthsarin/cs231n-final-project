@@ -20,7 +20,9 @@ class BaselineModel(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(778752, 640 * 640 * 2),
+            nn.Linear(778752, 2048),
+            nn.ReLU(),
+            nn.Linear(2048, 640 * 640 * 2),
             nn.Unflatten(1, (2, 640, 640)),
             nn.Sigmoid(),
         )
