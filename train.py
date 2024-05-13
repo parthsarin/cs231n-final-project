@@ -8,80 +8,10 @@ import wandb
 from datasets import load_dataset
 from data import augment, generate_masks
 from tqdm import tqdm
+from models import *
 
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-class BaselineModel(nn.Module):
-    def __init__(self, num_classes=2):
-        super().__init__()
-        self.num_classes = num_classes
-
-        # assuming image size is 640x640
-        # predict probs for each pixel
-        self.m = nn.Sequential(
-            nn.Conv2d(3, 32, 3, 1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, 1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, 1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(128, 256, 3, 1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Flatten(),
-            nn.Linear(369664, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 640 * 640),
-            nn.Sigmoid(),
-            nn.Unflatten(1, (640, 640)),
-        )
-
-        torch.nn.init.xavier_uniform_(self.m[0].weight)
-
-    def forward(self, x):
-        return self.m(x)
-
-
-class FullConvolutionModel(nn.Module):
-    def __init__(self, num_classes=2):
-        super().__init__()
-        self.num_classes = num_classes
-
-        # assuming image size is 640x640
-        # predict probs for each pixel
-        self.m = nn.Sequential(
-            nn.Conv2d(3, 32, 3, 1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(32, 512, 3, 2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(512, 1024, 3, 2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(1024, 2048, 3, 2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Conv2d(2048, 4096, 3, 1),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-            nn.Flatten(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(),
-            nn.Linear(4096, 640 * 640),
-            nn.Sigmoid(),
-            nn.Unflatten(1, (640, 640)),
-        )
-
-        torch.nn.init.xavier_uniform_(self.m[0].weight)
-
-    def forward(self, x):
-        return self.m(x)
 
 
 def train(args):
@@ -91,6 +21,17 @@ def train(args):
         model = FullConvolutionModel()
     else:
         raise ValueError("Model not supported")
+
+    wandb.init(
+        project="cs231n-final-project",
+        config={
+            "epochs": args.epochs,
+            "batch_size": args.batch_size,
+            "lr": args.lr,
+            "model": args.model,
+            "architecture": repr(model),
+        },
+    )
 
     model = model.to(device)
     loss_fn = nn.CrossEntropyLoss()
@@ -194,15 +135,5 @@ if __name__ == "__main__":
         "--save-every", type=int, default=10, help="Save model every n epochs"
     )
     args = parser.parse_args()
-
-    wandb.init(
-        project="cs231n-final-project",
-        config={
-            "epochs": args.epochs,
-            "batch_size": args.batch_size,
-            "lr": args.lr,
-            "model": args.model,
-        },
-    )
 
     train(args)
