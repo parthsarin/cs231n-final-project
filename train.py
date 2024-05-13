@@ -3,7 +3,6 @@ File: train.py
 """
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import argparse
 import wandb
 from datasets import load_dataset
@@ -45,7 +44,7 @@ class BaselineModel(nn.Module):
         torch.nn.init.xavier_uniform_(self.m[0].weight)
 
     def forward(self, x):
-        return F.sigmoid(self.m(x))
+        return self.m(x)
 
 
 class FullConvolutionModel(nn.Module):
@@ -82,7 +81,7 @@ class FullConvolutionModel(nn.Module):
         torch.nn.init.xavier_uniform_(self.m[0].weight)
 
     def forward(self, x):
-        return F.sigmoid(self.m(x))
+        return self.m(x)
 
 
 def train(args):
