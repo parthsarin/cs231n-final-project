@@ -37,10 +37,11 @@ def train(args):
     model = model.to(device)
 
     loss_fn = nn.CrossEntropyLoss()
-    test_loss = nn.CrossEntropyLoss(reduction="sum")
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     for ep_idx in range(args.epochs):
+        avg_train_loss = 0.0
+        N_batches = 0
         for batch_idx in range(0, len(ds["train"]), args.batch_size):
             batch = ds["train"][batch_idx : batch_idx + args.batch_size]
             augmented_batch = augment(batch)
@@ -67,6 +68,8 @@ def train(args):
             optimizer.step()
 
             wandb.log({"loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx})
+            avg_train_loss += loss.item()
+            N_batches += 1
 
         # save model
         if ep_idx % args.save_every == 0:
@@ -75,7 +78,6 @@ def train(args):
             )
 
             # evaluation
-            train_loss = loss.item()
             loss = 0.0
             acc = 0.0
             N_pixels = 0
@@ -98,13 +100,13 @@ def train(args):
                     preds = model(images)
 
                     # compute loss
-                    loss += test_loss(preds, masks)
+                    loss += loss_fn(preds, masks)
 
                     # compute accuracy
                     batch_accuracy = (preds.round() == masks).sum().item()
                     acc += batch_accuracy
                     N_pixels += masks.numel()
-                    CE_denom += masks.sum().item()
+                    CE_denom += 1
 
             loss /= CE_denom
             acc /= N_pixels
@@ -118,7 +120,7 @@ def train(args):
             )
 
             print(
-                f"[epoch {ep_idx}] train loss: {train_loss:.4f} test loss: {loss.item():.4f} test accuracy: {acc:.4f}"
+                f"[epoch {ep_idx}] train loss: {avg_train_loss:.4f} test loss: {loss.item():.4f} test accuracy: {acc:.4f}"
             )
 
 
