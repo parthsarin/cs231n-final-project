@@ -38,7 +38,22 @@ def train(args):
     model = nn.DataParallel(model)
     model = model.to(device)
 
-    loss_fn = nn.CrossEntropyLoss()
+    # loss_fn = nn.CrossEntropyLoss()
+    def loss_fn(preds, target, reduction="mean"):
+        loss = 0.0
+
+        # normal loss on the background (0th channel)
+        loss -= torch.sum(target[:, 0, :] * torch.log(preds[:, 0, :]))
+
+        # exaggerated loss on the license plate (1st channel)
+        loss += torch.sum(
+            target[:, 1, :] * torch.pow(-10 * torch.log(preds[:, 1, :]), 2)
+        )
+
+        if reduction == "mean":
+            loss /= target.numel()
+        return loss
+
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     for ep_idx in range(args.epochs):
