@@ -97,6 +97,8 @@ def train(args):
             # evaluation
             loss = 0.0
             acc = 0.0
+            acc_on_plate = 0.0
+            plate_pixels = 0
             N_pixels = 0
             CE_denom = 0
             for test_bidx in tqdm(range(0, len(ds["test"]), args.batch_size)):
@@ -122,17 +124,24 @@ def train(args):
                     # compute accuracy
                     batch_accuracy = (preds.round() == masks).sum().item()
                     acc += batch_accuracy
+                    acc_on_plate += (
+                        (preds.round()[:, 1, :] * masks[:, 1, :]).sum().item()
+                    )
+
                     N_pixels += masks.numel()
                     CE_denom += 1
+                    plate_pixels += masks[:, 1, :].sum().item()
 
             loss /= CE_denom
             acc /= N_pixels
+            acc_on_plate /= plate_pixels
             wandb.log(
                 {
                     "test_loss": loss.item(),
                     "epoch": ep_idx,
                     "batch_idx": batch_idx,
                     "accuracy": acc,
+                    "accuracy_on_plate": acc_on_plate,
                 }
             )
 
