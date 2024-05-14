@@ -55,6 +55,7 @@ def train(args):
         return loss
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
 
     for ep_idx in range(args.epochs):
         avg_train_loss = 0.0
@@ -87,6 +88,10 @@ def train(args):
             wandb.log({"loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx})
             avg_train_loss += loss.item()
             N_batches += 1
+
+        # step
+        scheduler.step()
+        avg_train_loss /= N_batches
 
         # save model
         if ep_idx % args.save_every == 0:
