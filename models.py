@@ -47,7 +47,7 @@ class FullConvolutionModel(nn.Module):
             nn.MaxPool2d(2),
             nn.Conv2d(512, 1024, 5, 3),
             nn.ReLU(),
-            nn.MaxPool2d(2),
+            nn.MaxPool2d(3),
             nn.Conv2d(1024, 2048, 5, 3),
             nn.Flatten(),
             nn.Linear(2048, 640 * 640 * 2),
