@@ -46,7 +46,7 @@ def train(args):
         loss -= torch.sum(target[:, 0, :] * torch.log(preds[:, 0, :]))
 
         # exaggerated loss on the license plate (1st channel)
-        loss -= torch.sum(
+        loss += torch.sum(
             target[:, 1, :] * torch.pow(10 * torch.log(preds[:, 1, :]), 2)
         )
 
