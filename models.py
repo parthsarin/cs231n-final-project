@@ -10,7 +10,7 @@ class BaselineModel(nn.Module):
         # assuming image size is 640x640
         # predict probs for each pixel
         self.m = nn.Sequential(
-            nn.Conv2d(3, 32, 5, 1),
+            nn.Conv2d(3, 32, 5, 3),
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Conv2d(32, 64, 5, 3),
@@ -20,7 +20,7 @@ class BaselineModel(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(8192, 640 * 640 * 2),
+            nn.Linear(512, 640 * 640 * 2),
             nn.Unflatten(1, (2, 640, 640)),
             nn.Softmax(dim=1),
         )
