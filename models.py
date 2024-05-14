@@ -10,21 +10,19 @@ class BaselineModel(nn.Module):
         # assuming image size is 640x640
         # predict probs for each pixel
         self.m = nn.Sequential(
-            nn.Conv2d(3, 32, 3, 1),
+            nn.Conv2d(3, 32, 5, 1),
             nn.ReLU(),
             nn.MaxPool2d(2),
-            nn.Conv2d(32, 64, 3, 1),
+            nn.Conv2d(32, 64, 5, 3),
             nn.ReLU(),
             nn.MaxPool2d(2),
-            nn.Conv2d(64, 128, 3, 1),
+            nn.Conv2d(64, 128, 5, 3),
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(778752, 2048),
-            nn.ReLU(),
-            nn.Linear(2048, 640 * 640 * 2),
+            nn.Linear(8192, 640 * 640 * 2),
             nn.Unflatten(1, (2, 640, 640)),
-            nn.Sigmoid(),
+            nn.Softmax(dim=1),
         )
 
         torch.nn.init.xavier_uniform_(self.m[0].weight)
@@ -61,7 +59,7 @@ class FullConvolutionModel(nn.Module):
             nn.ReLU(),
             nn.Linear(4096, 640 * 640 * 2),
             nn.Unflatten(1, (2, 640, 640)),
-            nn.Sigmoid(),
+            nn.Softmax(dim=1),
         )
 
         torch.nn.init.xavier_uniform_(self.m[0].weight)
