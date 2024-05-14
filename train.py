@@ -41,13 +41,14 @@ def train(args):
     # loss_fn = nn.CrossEntropyLoss()
     def loss_fn(preds, target, reduction="mean"):
         loss = 0.0
+        eps = 1e-6
 
         # normal loss on the background (0th channel)
-        loss -= torch.sum(target[:, 0, :] * torch.log(preds[:, 0, :]))
+        loss -= torch.sum(target[:, 0, :] * torch.log(preds[:, 0, :] + eps))
 
         # exaggerated loss on the license plate (1st channel)
         loss += torch.sum(
-            target[:, 1, :] * torch.pow(10 * torch.log(preds[:, 1, :]), 2)
+            target[:, 1, :] * torch.pow(10 * torch.log(preds[:, 1, :] + eps), 2)
         )
 
         if reduction == "mean":
