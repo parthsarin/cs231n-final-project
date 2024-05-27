@@ -2,7 +2,6 @@
 File: train.py
 """
 import torch
-import torch.nn as nn
 import argparse
 import wandb
 from data import augment, generate_masks
@@ -41,7 +40,7 @@ def train(args):
     Path(args.save_path).mkdir(parents=True, exist_ok=True)
 
     # move to device
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
     model = model.to(device)
 
     def loss_fn(preds, target, reduction="mean", l=vars(args).get("l", 1.0)):
@@ -88,7 +87,7 @@ def train(args):
             # backward pass
             optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.1)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
 
             wandb.log({"loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx})
@@ -180,7 +179,7 @@ if __name__ == "__main__":
         "--save-path", type=str, default="out", help="Path to save model"
     )
     parser.add_argument(
-        "--save-every", type=int, default=10, help="Save model every n epochs"
+        "--save-every", type=int, default=1, help="Save model every n epochs"
     )
     args = parser.parse_args()
 
