@@ -5,7 +5,7 @@ import torch
 from torchvision.transforms import v2
 from torchvision import tv_tensors
 
-IMG_SIZE = (640, 640)
+IMG_SIZE = (320, 320)
 
 
 def generate_masks(augmented_batch):

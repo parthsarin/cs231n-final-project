@@ -7,7 +7,7 @@ class BaselineModel(nn.Module):
         super().__init__()
         self.num_classes = num_classes
 
-        # assuming image size is 640x640
+        # assuming image size is 320x320
         # predict probs for each pixel
         self.m = nn.Sequential(
             nn.Conv2d(3, 32, 5, 3),
@@ -20,8 +20,8 @@ class BaselineModel(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(512, 640 * 640 * 2),
-            nn.Unflatten(1, (2, 640, 640)),
+            nn.Linear(128, 320 * 320 * 2),
+            nn.Unflatten(1, (2, 320, 320)),
             nn.Softmax(dim=1),
         )
 
@@ -36,7 +36,7 @@ class FullConvolutionModel(nn.Module):
         super().__init__()
         self.num_classes = num_classes
 
-        # assuming image size is 640x640
+        # assuming image size is 320x320
         # predict probs for each pixel
         self.m = nn.Sequential(
             nn.Conv2d(3, 32, 5, 1),
@@ -48,10 +48,10 @@ class FullConvolutionModel(nn.Module):
             nn.Conv2d(64, 256, 5, 3),
             nn.ReLU(),
             nn.MaxPool2d(3),
-            nn.Conv2d(256, 512, 5, 3),
+            nn.Conv2d(256, 512, 2, 1),
             nn.Flatten(),
-            nn.Linear(512, 640 * 640 * 2),
-            nn.Unflatten(1, (2, 640, 640)),
+            nn.Linear(512, 320 * 320 * 2),
+            nn.Unflatten(1, (2, 320, 320)),
             nn.Softmax(dim=1),
         )
 
