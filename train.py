@@ -40,7 +40,7 @@ def train(args):
     Path(args.save_path).mkdir(parents=True, exist_ok=True)
 
     # move to device
-    # model = nn.DataParallel(model)
+    model = nn.DataParallel(model)
     model = model.to(device)
 
     def loss_fn(preds, target, reduction="mean", l=vars(args).get("l", 1.0)):
@@ -87,7 +87,7 @@ def train(args):
             # backward pass
             optimizer.zero_grad()
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.1)
             optimizer.step()
 
             wandb.log({"loss": loss.item(), "epoch": ep_idx, "batch_idx": batch_idx})

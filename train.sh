@@ -11,5 +11,5 @@ nohup python train.py \
     --epochs 100 \
     --lr 0.05 \
     --lambda 8 \
-    --batch-size 256 \
+    --batch-size 512 \
     > train.log 2>&1 </dev/null &
