@@ -5,11 +5,9 @@ import torch
 import torch.nn as nn
 import argparse
 import wandb
-from datasets import load_dataset
 from data import augment, generate_masks
 from tqdm import tqdm
 from models import *
-import os
 from pathlib import Path
 
 os.environ["LD_LIBRARY_PATH"] = ""
@@ -32,11 +30,8 @@ def train(args):
     wandb.init(
         project="cs231n-final-project",
         config={
-            "epochs": args.epochs,
-            "batch_size": args.batch_size,
-            "lr": args.lr,
-            "model": args.model,
             "architecture": repr(model),
+            **vars(args),
         },
     )
 
@@ -47,7 +42,7 @@ def train(args):
     model = nn.DataParallel(model)
     model = model.to(device)
 
-    def loss_fn(preds, target, reduction="mean", l=args.l):
+    def loss_fn(preds, target, reduction="mean", l=vars(args).get("l", 1.0)):
         loss = 0.0
         eps = 1e-6
 
