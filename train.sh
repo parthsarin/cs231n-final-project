@@ -1,6 +1,8 @@
 echo "Installing requirements..."
 python -m pip install -r requirements.txt
 
+export LD_LIBRARY_PATH=""
+
 echo "Starting training..."
 nohup python train.py \
     --model baseline \

@@ -13,8 +13,12 @@ import os
 from pathlib import Path
 
 os.environ["LD_LIBRARY_PATH"] = ""
+
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
+print("Loaded dataset")
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
 
 
 def train(args):
@@ -43,7 +47,7 @@ def train(args):
     model = nn.DataParallel(model)
     model = model.to(device)
 
-    def loss_fn(preds, target, reduction="mean", l=2.0):
+    def loss_fn(preds, target, reduction="mean", l=args.l):
         loss = 0.0
         eps = 1e-6
 
@@ -168,6 +172,13 @@ if __name__ == "__main__":
     parser.add_argument("--batch-size", type=int, default=30, help="Batch size")
     parser.add_argument("--lr", type=float, default=1e-2, help="Learning rate")
     parser.add_argument("--model", type=str, default="baseline", help="Model to train")
+    parser.add_argument(
+        "-l",
+        "--lambda",
+        type=float,
+        default=2.0,
+        help="Lambda for loss (how much to upweight the license plate)",
+    )
     parser.add_argument(
         "--save-path", type=str, default="out", help="Path to save model"
     )
