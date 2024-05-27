@@ -10,6 +10,7 @@ from data import augment, generate_masks
 from tqdm import tqdm
 from models import *
 import os
+from pathlib import Path
 
 os.environ["LD_LIBRARY_PATH"] = ""
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
@@ -35,10 +36,13 @@ def train(args):
         },
     )
 
+    # make the save path
+    Path(args.save_path).mkdir(parents=True, exist_ok=True)
+
+    # move to device
     model = nn.DataParallel(model)
     model = model.to(device)
 
-    # loss_fn = nn.CrossEntropyLoss()
     def loss_fn(preds, target, reduction="mean", l=2.0):
         loss = 0.0
         eps = 1e-6
