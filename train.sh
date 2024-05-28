@@ -9,4 +9,4 @@ python train.py \
     --epochs 100 \
     --lr 0.005 \
     --lambda 5 \
-    --batch-size 512
+    --batch-size 1000
