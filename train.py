@@ -9,9 +9,6 @@ from tqdm import tqdm
 from models import *
 from pathlib import Path
 from datasets import load_dataset
-import os
-
-os.environ["LD_LIBRARY_PATH"] = ""
 
 ds = load_dataset("keremberke/license-plate-object-detection", name="full")
 print("Loaded dataset")
