@@ -43,7 +43,7 @@ def train(args):
     model = nn.DataParallel(model)
     model = model.to(device)
 
-    def loss_fn(preds, target, reduction="mean", l=vars(args).get("l", 1.0)):
+    def loss_fn(preds, target, reduction="mean", l=vars(args).get("lambda", 1.0)):
         loss = 0.0
         eps = 1e-6
 
