@@ -26,7 +26,7 @@ def generate_masks(augmented_batch):
     return masks
 
 
-def augment(batch):
+def augment(batch, test=False):
     """
     Augments the batch
     """
@@ -40,17 +40,20 @@ def augment(batch):
     ]
 
     images = batch["image"]
-
-    transforms = v2.Compose(
-        [
-            v2.ToImage(),
-            v2.ToDtype(torch.uint8, scale=True),
-            v2.RandomResizedCrop(size=IMG_SIZE, antialias=True),
+    transforms = [
+        v2.ToImage(),
+        v2.ToDtype(torch.uint8, scale=True),
+        v2.RandomResizedCrop(size=IMG_SIZE, antialias=True),
+    ]
+    if not test:
+        transforms += [
             v2.RandomPhotometricDistort(p=0.3),
             v2.RandomHorizontalFlip(p=0.3),
             v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.0)),
-            v2.ToDtype(torch.float32, scale=True),
-            # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
-    )
+    transforms += [
+        v2.ToDtype(torch.float32, scale=True),
+        # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+    transforms = v2.Compose(transforms)
     return [transforms(image, box) for image, box in zip(images, boxes)]

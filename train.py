@@ -110,7 +110,7 @@ def train(args):
             CE_denom = 0
             for test_bidx in tqdm(range(0, len(ds["test"]), args.batch_size)):
                 batch = ds["test"][test_bidx : test_bidx + args.batch_size]
-                augmented_batch = augment(batch)
+                augmented_batch = augment(batch, test=True)
                 masks = generate_masks(augmented_batch)
 
                 # convert to torch tensors
